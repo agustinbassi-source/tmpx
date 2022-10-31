@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report by class</title>
+
+
+  <link href="../lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+  <link href="../css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+  <h1 class="title">Report by class</h1>
+  <span class="display">Show: </span>
+  <input checked data-tooltip='first level' id='radio-1' name='test' type='radio' /><label for="radio-1">Class</label>
+  <input id='radio-2' data-tooltip='second level' name='test' type='radio' /><label for="radio-2">Function</label>
+  <input id='radio-3' data-tooltip='third level' name='test' type='radio' /><label for="radio-3">xxxx</label>
+
+
+  <ol class="wtree" id="treeCode">
+    <!--<li>
+      <span>Life</span>
+      <ol>-->
+    <!--<li>
+      <span>Personal Issues</span>
+      <ol>-->
+    <!--<li><span>Our Staff Picks <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">View code</button></span></li>
+
+          </ol>
+        </li>
+
+      </ol>
+    </li>-->
+
+
+
+  </ol>
+
+  <div class="modal fade bd-example-modal-lg modal-fullscreen-xxl-down"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" >
+      <div class="modal-content" id="modalContentX">
+        ...
+      </div>
+    </div>
+  </div>
+
+  <script src="../lib/jquery/dist/jquery.js"></script>
+
+  <script src="../lib/bootstrap/dist/js/bootstrap.js"></script>
+
+  <script type="text/javascript">
+
+    var dataAll = {};
+
+    const getCode = (name) => {
+
+      console.log('search: ' + name);
+
+      dataAll.items.forEach(filex => {
+
+        if (filex.data == name)
+          document.getElementById('modalContentX').innerHTML = filex.code;
+
+      });
+       
+    }
+
+    const getReport = () => {
+
+      fetch('/api/report/buildDos')
+        .then(response => response.json())
+        .then(data => {
+
+          console.log(data)
+
+          dataAll = data;
+
+          let innerHtml;
+
+          dataAll.items.forEach(filex => {
+
+            innerHtml = ' <li> <span>' + filex.data + '  <ol>'
+
+            filex.items.forEach(classx => {
+
+              innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
+
+
+              classx.items.forEach(functionx => {
+
+                innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
+
+              });
+
+              innerHtml += '  </ol> </li> ';
+
+            });
+
+            innerHtml += '  </ol> </li> ';
+
+            document.getElementById("treeCode").innerHTML += innerHtml;
+
+          });
+
+
+
+        });
+
+    }
+
+    getReport();
+
+  </script>
+
+
+</body>
+</html>
