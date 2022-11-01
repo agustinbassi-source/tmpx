@@ -23,7 +23,7 @@ namespace ProyectoX.Controllers.Api
     {
       proyecto2 = reportService.GenerateProyect("X:\\FGNUGETUPDATE\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Buckets.cs");
       proyecto2.LocalDirectory = "X:\\FGNUGETUPDATE";
-      proyecto2.RelativePath = "\\Wigos System\\WGC\\GUI"; //WGC\\GUI
+      proyecto2.RelativePath = "\\Wigos System"; //WGC\\GUI
       proyecto2.ProyectName = "GUI Test";
     }
 

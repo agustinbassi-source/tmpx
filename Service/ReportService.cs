@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Service
 {
@@ -20,6 +21,8 @@ namespace Service
       var reportInitial = BuildReport(proyect);
 
       Report response = new Report();
+
+      response.Paths = reportInitial.Paths;
 
       var file = proyect.ProyectFiles[0];
 
@@ -35,7 +38,7 @@ namespace Service
         {
           ReportItem functionxItem = new ReportItem();
 
-          functionxItem.Data = functionx.FunctionName + " (total: " + functionx.Count + ")";
+          functionxItem.Data = functionx.FunctionName + " (total: " + functionx.Count + ") => " + functionx.Parameters;
 
           foreach (var item in reportInitial.Items)
           {
@@ -43,12 +46,19 @@ namespace Service
             {
               foreach (var item3 in item2.Items)
               {
-                if (item2.Data == classx.Name && item3.Data == functionx.FunctionName )
+                if (item2.Data == classx.Name && item3.Data == functionx.FunctionName)
                 {
-                  functionxItem.Items.Add(new ReportItem
+                  var functionData = item.Data + " (" + item.Path + ":" + item3.LineNumber + ") => " + item3.LineCode;
+
+                  var exist = functionxItem.Items.Where(x => x.Data == functionData).FirstOrDefault();
+
+                  if (exist == null)
                   {
-                    Data = item.Data
-                  });
+                    functionxItem.Items.Add(new ReportItem
+                    {
+                      Data = functionData
+                    });
+                  }
                 }
               }
             }
@@ -79,14 +89,18 @@ namespace Service
 
         foreach (var item in filesNameSpace)
         {
-          var code = File.ReadAllText(item.FullName, Encoding.UTF8);
+          var code = File.ReadAllText(item.File.FullName, Encoding.UTF8);
+
+          string path = item.File.FullName.Replace(proyect.LocalDirectory, "").Replace(@"\\", @"\");
 
           response.Items.Add(new ReportItem
           {
-            Data = item.Name,
+            Data = item.File.Name,
             Code = code.Replace(System.Environment.NewLine, "<br/>").Replace(" ", "&nbsp").Replace("\t", "  "),
-            Path = item.FullName.Replace(proyect.LocalDirectory, "").Replace(@"\\", @"\")
+            Path = path
           });
+
+
         }
 
         foreach (var classx in file.ProyectClasses)
@@ -98,7 +112,7 @@ namespace Service
 
           foreach (var fc2 in fileClasses2)
           {
-            if (!fileClasses.Select(x => x.Name).ToList().Contains(fc2.Name))
+            if (!fileClasses.Select(x => x.File.Name).ToList().Contains(fc2.File.Name))
             {
               fileClasses.Add(fc2);
             }
@@ -106,17 +120,20 @@ namespace Service
 
           foreach (var item in fileClasses)
           {
-            var algo = response.Items.Where(x => x.Data == item.Name).FirstOrDefault();
+            var algo = response.Items.Where(x => x.Data == item.File.Name).FirstOrDefault();
 
             algo.Code = algo.Code.Replace(classx.Name,
                      "<span style=\"background-color: yellow\">" + classx.Name + "</span>");
+
+            string path = item.File.FullName.Replace(proyect.LocalDirectory, "").Replace(@"\\", @"\");
+
+            response.Paths.Add(path.Substring(0, path.LastIndexOf(@"\")));
 
             algo.Items.Add(
                new ReportItem
                {
                  Data = classx.Name
-               }
-               );
+               });
           }
 
           foreach (var proyectFunction in classx.ProyectFunctions)
@@ -128,7 +145,7 @@ namespace Service
             {
               var itemsNamspace = response.Items.Where(x => x.Items.Count > 0).ToList();
 
-              itemsNamspace = itemsNamspace.Where(x => x.Data == item.Name).ToList();
+              itemsNamspace = itemsNamspace.Where(x => x.Data == item.File.Name).ToList();
 
               foreach (var inspace in itemsNamspace)
               {
@@ -150,8 +167,8 @@ namespace Service
                     asd.Items.Add(new ReportItem
                     {
                       Data = proyectFunction.FunctionName,
-
-
+                      LineCode = item.LineCode,
+                      LineNumber = item.LineNumber
                     });
                   }
                 }
@@ -208,13 +225,13 @@ namespace Service
 
     public void WriteReportHtml(Report report, string reportName, string path, string destinationPath)
     {
-     // var code = File.ReadAllText(path + reportName + ".html", Encoding.UTF8);
+      // var code = File.ReadAllText(path + reportName + ".html", Encoding.UTF8);
 
-     //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
+      //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
 
-     // File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
+      // File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
 
-     // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
+      // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
     }
 
     public Proyect GenerateProyect(string path)
@@ -228,7 +245,7 @@ namespace Service
 
     private ProyectFile GetFile(string path)
     {
-      var code = File.ReadLines(path, Encoding.UTF8);
+      var code = File.ReadLines(path, Encoding.UTF8).ToList();
 
       var response = new ProyectFile();
 
@@ -240,13 +257,10 @@ namespace Service
 
       int lineNumber = 0;
 
-      int totalLines = code.ToList().Count;
+      int totalLines = code.Count;
 
       foreach (var line in code)
       {
-        lineNumber += 1;
-
-
         if (line.IndexOf("namespace") >= 0)
         {
           response.Namespace = line.Substring(line.IndexOf("namespace") + 10).Trim();
@@ -293,6 +307,7 @@ namespace Service
           var match = Regex.Match(line, "([a-z].) ([a-z]*)([^\\s-])([(].)", RegexOptions.IgnoreCase);
 
           var functionName = string.Empty;
+          var parameters = string.Empty;
 
           if (match.Success)
           {
@@ -305,14 +320,40 @@ namespace Service
             {
               functionName = match.Value.Substring(match.Value.IndexOf(" ")).Trim();
               functionName = functionName.Substring(0, functionName.IndexOf("(")).Trim();
+
+              parameters = line.Substring(line.IndexOf("(")).Trim();
+
+              if (line.IndexOf(")") == -1)
+              {
+                bool found = false;
+
+                while (!found)
+                {
+                  for (int i = (lineNumber + 1); i < (code.Count() - 1); i++)
+                  {
+
+                    parameters += code[i].Trim().Replace(System.Environment.NewLine, " ");
+
+                    if (code[i].IndexOf(")") > -1)
+                    {
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+
+              }
             }
 
             functions.Add(new ProyectFunction
             {
-              FunctionName = functionName
+              FunctionName = functionName,
+              Parameters = parameters
             });
           }
         }
+
+        lineNumber += 1;
       }
 
       return response;
