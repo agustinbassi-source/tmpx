@@ -50,7 +50,7 @@
 
   <script type="text/javascript">
 
-    var dataAll = {};
+    var dataAll = null;
 
     const getCode = (name) => {
 
@@ -65,49 +65,60 @@
        
     }
 
-    const getReport = () => {
+    const fillReport = () => {
 
-      fetch('/api/report/build')
-        .then(response => response.json())
-        .then(data => {
+      let innerHtml;
 
-          console.log(data)
+      dataAll.items.forEach(filex => {
 
-          dataAll = data;
+        innerHtml = ' <li> <span>' + filex.data + ' <button type="button" onClick="getCode(`' + filex.data + '`)" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">View code</button> (' + filex.path + ')</span> <ol>'
 
-          let innerHtml;
+        filex.items.forEach(classx => {
 
-          dataAll.items.forEach(filex => {
-
-            innerHtml = ' <li> <span>' + filex.data + ' <button type="button" onClick="getCode(`' + filex.data + '`)" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">View code</button> ('+filex.path+')</span> <ol>'
-
-            filex.items.forEach(classx => {
-
-              innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
+          innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
 
 
-              classx.items.forEach(functionx => {
+          classx.items.forEach(functionx => {
 
-                innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
-
-              });
-
-              innerHtml += '  </ol> </li> ';
-
-            });
-
-            innerHtml += '  </ol> </li> ';
-
-            document.getElementById("treeCode").innerHTML += innerHtml;
+            innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
 
           });
 
-
+          innerHtml += '  </ol> </li> ';
 
         });
 
+        innerHtml += '  </ol> </li> ';
+
+        document.getElementById("treeCode").innerHTML += innerHtml;
+      });
+
     }
 
+
+    const getReport = () => {
+
+      if (dataAll === null) {
+
+        fetch('/api/report/build')
+          .then(response => response.json())
+          .then(data => {
+
+            console.log(data)
+
+            dataAll = data;
+
+            fillReport();
+
+          });
+      }
+      else {
+        fillReport();
+      }
+
+    }
+
+   
     getReport();
 
   </script>

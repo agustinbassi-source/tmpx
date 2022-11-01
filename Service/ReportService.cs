@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -35,6 +36,23 @@ namespace Service
           ReportItem functionxItem = new ReportItem();
 
           functionxItem.Data = functionx.FunctionName + " (total: " + functionx.Count + ")";
+
+          foreach (var item in reportInitial.Items)
+          {
+            foreach (var item2 in item.Items)
+            {
+              foreach (var item3 in item2.Items)
+              {
+                if (item2.Data == classx.Name && item3.Data == functionx.FunctionName )
+                {
+                  functionxItem.Items.Add(new ReportItem
+                  {
+                    Data = item.Data
+                  });
+                }
+              }
+            }
+          }
 
           classxItem.Items.Add(functionxItem);
         }
@@ -188,6 +206,17 @@ namespace Service
       return response;
     }
 
+    public void WriteReportHtml(Report report, string reportName, string path, string destinationPath)
+    {
+     // var code = File.ReadAllText(path + reportName + ".html", Encoding.UTF8);
+
+     //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
+
+     // File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
+
+     // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
+    }
+
     public Proyect GenerateProyect(string path)
     {
       var response = new Proyect();
@@ -263,10 +292,20 @@ namespace Service
         {
           var match = Regex.Match(line, "([a-z].) ([a-z]*)([^\\s-])([(].)", RegexOptions.IgnoreCase);
 
+          var functionName = string.Empty;
+
           if (match.Success)
           {
-            var functionName = match.Value.Substring(match.Value.IndexOf(" ")).Trim();
-            functionName = functionName.Substring(0, functionName.IndexOf("(")).Trim();
+            if (line.IndexOf("public Dictionary<") > -1)
+            {
+              functionName = line.Substring(line.IndexOf(">") + 1).Trim();
+              functionName = functionName.Substring(0, functionName.IndexOf(" ")).Trim();
+            }
+            else
+            {
+              functionName = match.Value.Substring(match.Value.IndexOf(" ")).Trim();
+              functionName = functionName.Substring(0, functionName.IndexOf("(")).Trim();
+            }
 
             functions.Add(new ProyectFunction
             {

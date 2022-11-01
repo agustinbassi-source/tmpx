@@ -14,7 +14,7 @@
   <span class="display">Show: </span>
   <input checked data-tooltip='first level' id='radio-1' name='test' type='radio' /><label for="radio-1">Class</label>
   <input id='radio-2' data-tooltip='second level' name='test' type='radio' /><label for="radio-2">Function</label>
-  <input id='radio-3' data-tooltip='third level' name='test' type='radio' /><label for="radio-3">xxxx</label>
+  <input id='radio-3' data-tooltip='third level' name='test' type='radio' /><label for="radio-3">File</label>
 
 
   <ol class="wtree" id="treeCode">
@@ -36,8 +36,8 @@
 
   </ol>
 
-  <div class="modal fade bd-example-modal-lg modal-fullscreen-xxl-down"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" >
+  <div class="modal fade bd-example-modal-lg modal-fullscreen-xxl-down" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content" id="modalContentX">
         ...
       </div>
@@ -50,7 +50,7 @@
 
   <script type="text/javascript">
 
-    var dataAll = {};
+    var dataAll = null;
 
     const getCode = (name) => {
 
@@ -62,51 +62,106 @@
           document.getElementById('modalContentX').innerHTML = filex.code;
 
       });
-       
+
+    }
+
+    const fillReport = () => {
+
+      let innerHtml;
+
+      dataAll.items.forEach(filex => {
+
+        innerHtml = ' <li> <span>' + filex.data + '  <ol>'
+
+        filex.items.forEach(classx => {
+
+          innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
+
+
+          classx.items.forEach(functionx => {
+
+            innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
+
+          });
+
+          innerHtml += '  </ol> </li> ';
+
+        });
+
+        innerHtml += '  </ol> </li> ';
+
+        document.getElementById("treeCode").innerHTML += innerHtml;
+
+      });
+
+
     }
 
     const getReport = () => {
 
-      fetch('/api/report/buildDos')
-        .then(response => response.json())
-        .then(data => {
+      if (dataAll === null) {
 
-          console.log(data)
+        fetch('/api/report/buildDos')
+          .then(response => response.json())
+          .then(data => {
 
-          dataAll = data;
+            console.log(data)
 
-          let innerHtml;
+            dataAll = data;
 
-          dataAll.items.forEach(filex => {
-
-            innerHtml = ' <li> <span>' + filex.data + '  <ol>'
-
-            filex.items.forEach(classx => {
-
-              innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
-
-
-              classx.items.forEach(functionx => {
-
-                innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
-
-              });
-
-              innerHtml += '  </ol> </li> ';
-
-            });
-
-            innerHtml += '  </ol> </li> ';
-
-            document.getElementById("treeCode").innerHTML += innerHtml;
+            fillReport();
 
           });
-
-
-
-        });
+      }
+      else {
+        fillReport();
+      }
 
     }
+
+
+    //const getReport = () => {
+
+    //  fetch('/api/report/buildDos')
+    //    .then(response => response.json())
+    //    .then(data => {
+
+    //      console.log(data)
+
+    //      dataAll = data;
+
+    //      let innerHtml;
+
+    //      dataAll.items.forEach(filex => {
+
+    //        innerHtml = ' <li> <span>' + filex.data + '  <ol>'
+
+    //        filex.items.forEach(classx => {
+
+    //          innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
+
+
+    //          classx.items.forEach(functionx => {
+
+    //            innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
+
+    //          });
+
+    //          innerHtml += '  </ol> </li> ';
+
+    //        });
+
+    //        innerHtml += '  </ol> </li> ';
+
+    //        document.getElementById("treeCode").innerHTML += innerHtml;
+
+    //      });
+
+
+
+    //    });
+
+    //}
 
     getReport();
 

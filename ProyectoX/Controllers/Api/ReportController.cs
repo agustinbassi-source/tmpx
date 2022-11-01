@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Service;
 using Service.Models;
+using System.IO;
+using System.Text;
 
 namespace ProyectoX.Controllers.Api
 {
@@ -12,6 +14,10 @@ namespace ProyectoX.Controllers.Api
     ReportService reportService = new ReportService();
 
     Proyect proyecto2;
+
+    string pathHtml = "X:\\Git\\tmpx\\ProyectoX\\wwwroot\\html\\";
+
+    string pathDestinationHtml = "X:\\Git\\report\\";
 
     public ReportController()
     {
@@ -26,7 +32,13 @@ namespace ProyectoX.Controllers.Api
     [HttpGet]
     public Report Build()
     {
-      return reportService.BuildReport(proyecto2);
+      var response = reportService.BuildReport(proyecto2);
+
+    reportService.WriteReportHtml(response,"report", pathHtml, pathDestinationHtml);
+
+      return response;
+
+      
 
       // ReportService reportService = new ReportService();
 
@@ -36,7 +48,7 @@ namespace ProyectoX.Controllers.Api
       //proyecto2.RelativePath = "\\Wigos System\\"; //WGC\\GUI
       //proyecto2.ProyectName = "GUI Test";
 
-   
+
 
       //var proyect = new Proyect()
       //{
@@ -76,7 +88,11 @@ namespace ProyectoX.Controllers.Api
     {
      
 
-      return reportService.BuildReport2(proyecto2);
+      var response = reportService.BuildReport2(proyecto2);
+
+     reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
+
+      return response;
 
       //var proyect = new Proyect()
       //{
