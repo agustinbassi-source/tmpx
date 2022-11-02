@@ -32,7 +32,12 @@ namespace ProyectoX.Controllers.Api
     [HttpGet]
     public Report Build()
     {
-      var response = reportService.BuildReport(proyecto2);
+      var json = string.Empty;
+      using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
+      {
+        json = r.ReadToEnd();
+      }
+        var response = reportService.BuildReport(proyecto2, json);
 
     reportService.WriteReportHtml(response,"report", pathHtml, pathDestinationHtml);
 

@@ -351,6 +351,16 @@ namespace Service
       return response;
     }
 
+    public Report BuildReport(Proyect proyect, string jsonString)
+    {
+      Report response = new Report();
+
+      response = JsonSerializer.Deserialize<Report>(jsonString);
+
+
+      return response;
+    }
+
     public void WriteReportHtml(Report report, string reportName, string path, string destinationPath)
     {
       // var code = File.ReadAllText(path + reportName + ".html", Encoding.UTF8);
