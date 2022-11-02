@@ -30,7 +30,58 @@ namespace Service
 
       var file = proyect.ProyectFiles[0];
 
-    
+      var levelOther = new ReportItem
+      {
+        Data = "Others",
+        DataRaw = "Others"
+      };
+
+      foreach (var proyectx in proyect.ProyectsList)
+      {
+        var level1 = new ReportItem
+        {
+          Data = proyectx.Substring(proyectx.LastIndexOf(@"\") + 1),
+          DataRaw = proyectx
+        };
+
+        foreach (var filex in reportInitial.Items)
+        {
+          foreach (var classx in filex.Items)
+          {
+            foreach (var functionx in classx.Items)
+            {
+              if (filex.Path.Contains(proyectx) && !level1.Items.Select(x => x.DataRaw).Contains(functionx.Data))
+              {
+                var level2 = new ReportItem
+                {
+                  Data = classx.Data + "." + functionx.Data,
+                  DataRaw = functionx.Data,
+                };
+
+                level1.Items.Add(level2);
+              }
+              else
+              {
+                //var level2 = new ReportItem
+                //{
+                //  Data = classx.Data + "." + functionx.Data,
+                //  DataRaw = functionx.Data,
+                //};
+
+                //levelOther.Items.Add(level2);
+              }
+            }
+          }
+
+
+        }
+
+
+        response.Items.Add(level1);
+      }
+
+      response.Items.Add(levelOther);
+
 
       return response;
     }
@@ -42,7 +93,7 @@ namespace Service
 
       Report response = new Report();
 
-      response.Paths = reportInitial.Paths.OrderBy(x=> x).ToList();
+      response.Paths = reportInitial.Paths.OrderBy(x => x).ToList();
 
       response.UniquePaths = reportInitial.UniquePaths.OrderBy(x => x).ToList();
 
@@ -306,7 +357,7 @@ namespace Service
 
       //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
 
-      // File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
+      //    File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
 
       // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
     }
@@ -350,7 +401,7 @@ namespace Service
         }
         else if ((line.IndexOf("class ") >= 0
           && ((line.IndexOf("//") > line.IndexOf("class ") || line.IndexOf("//") < 0))
-          && line.IndexOf("\"") == -1) || lineNumber == (totalLines -1))
+          && line.IndexOf("\"") == -1) || lineNumber == (totalLines - 1))
         {
 
           if (className != string.Empty)
