@@ -16,13 +16,37 @@ namespace Service
   {
     private readonly SearchService searchService = new SearchService();
 
+    public Report BuildReport3(Proyect proyect)
+    {
+      var reportInitial = BuildReport(proyect);
+
+      Report response = new Report();
+
+      response.Paths = reportInitial.Paths.OrderBy(x => x).ToList();
+
+      response.UniquePaths = reportInitial.UniquePaths.OrderBy(x => x).ToList();
+
+      response.UniquePathsCount = reportInitial.UniquePathsCount;
+
+      var file = proyect.ProyectFiles[0];
+
+    
+
+      return response;
+    }
+
+
     public Report BuildReport2(Proyect proyect)
     {
       var reportInitial = BuildReport(proyect);
 
       Report response = new Report();
 
-      response.Paths = reportInitial.Paths;
+      response.Paths = reportInitial.Paths.OrderBy(x=> x).ToList();
+
+      response.UniquePaths = reportInitial.UniquePaths.OrderBy(x => x).ToList();
+
+      response.UniquePathsCount = reportInitial.UniquePathsCount;
 
       var file = proyect.ProyectFiles[0];
 
@@ -30,9 +54,27 @@ namespace Service
       {
         ReportItem classxItem = new ReportItem();
 
+        ReportItem classReport = new ReportItem();
+
+        foreach (var item in reportInitial.Items)
+        {
+          var tmpGet = item.Items.Where(x => x.Data == classx.Name).FirstOrDefault();
+
+          if (tmpGet != null)
+          {
+            classReport = tmpGet;
+          }
+        }
+
+        //    var classesReport =   reportInitial.Items.Where(x => x.Data == classx.Name).ToList();
+
         classxItem.Data = classx.Name;
 
-        classxItem.Data += " (total: " + classx.Count + ")";
+        classxItem.DataRaw = classx.Name;
+
+        classxItem.FilesFind = classReport.FilesFind;
+
+        classxItem.Data += " (total: " + classx.Count + ", total files: " + classReport.FilesCount + ")";
 
         foreach (var functionx in classx.ProyectFunctions)
         {
@@ -106,9 +148,14 @@ namespace Service
         foreach (var classx in file.ProyectClasses)
         {
 
+          if (classx.Name == "Bucket_Properties")
+          { }
+
           // Encuentro los archivos que hagan referencia al namspace y la clase
           var fileClasses = searchService.Find(null, filesNameSpace, classx.Name + ".", exclude);
           var fileClasses2 = searchService.Find(null, filesNameSpace, classx.Name + "(", exclude);
+          var fileClasses3 = searchService.Find(null, filesNameSpace, classx.Name + " ", exclude);
+          var fileClasses4 = searchService.Find(null, filesNameSpace, "As " + classx.Name, exclude);
 
           foreach (var fc2 in fileClasses2)
           {
@@ -117,6 +164,24 @@ namespace Service
               fileClasses.Add(fc2);
             }
           }
+
+          foreach (var fc2 in fileClasses3)
+          {
+            if (!fileClasses.Select(x => x.File.Name).ToList().Contains(fc2.File.Name))
+            {
+              fileClasses.Add(fc2);
+            }
+          }
+
+          foreach (var fc2 in fileClasses4)
+          {
+            if (!fileClasses.Select(x => x.File.Name).ToList().Contains(fc2.File.Name))
+            {
+              fileClasses.Add(fc2);
+            }
+          }
+
+          var filesIn = fileClasses.Select(x => x.File.FullName.Replace(proyect.LocalDirectory, "")).Distinct().ToList();
 
           foreach (var item in fileClasses)
           {
@@ -129,10 +194,15 @@ namespace Service
 
             response.Paths.Add(path.Substring(0, path.LastIndexOf(@"\")));
 
+
+
             algo.Items.Add(
                new ReportItem
                {
-                 Data = classx.Name
+                 Data = classx.Name,
+                 FilesCount = filesIn.Count,
+                 FilesFindText = string.Join(",", filesIn),
+                 FilesFind = filesIn
                });
           }
 
@@ -220,6 +290,13 @@ namespace Service
 
       response.Items = files;
 
+      response.UniquePaths = response.Paths.Distinct().ToList();
+
+      foreach (var pathUnique in response.UniquePaths)
+      {
+        response.UniquePathsCount.Add(pathUnique, response.Paths.Where(x => x == pathUnique).Count());
+      }
+
       return response;
     }
 
@@ -237,6 +314,12 @@ namespace Service
     public Proyect GenerateProyect(string path)
     {
       var response = new Proyect();
+
+      response.ProyectsList.AddRange(new List<string>{
+      "\\Wigos System\\WGC\\Kernel\\WSI.Common",
+      "\\Wigos System\\WGC\\Kernel\\WSI.CommonA",
+      "\\Wigos System\\WGC\\GUI"
+      });
 
       response.ProyectFiles.Add(GetFile(path));
 
@@ -267,7 +350,7 @@ namespace Service
         }
         else if ((line.IndexOf("class ") >= 0
           && ((line.IndexOf("//") > line.IndexOf("class ") || line.IndexOf("//") < 0))
-          && line.IndexOf("\"") == -1) || lineNumber == totalLines)
+          && line.IndexOf("\"") == -1) || lineNumber == (totalLines -1))
         {
 
           if (className != string.Empty)

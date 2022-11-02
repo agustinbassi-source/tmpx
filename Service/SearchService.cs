@@ -15,6 +15,8 @@ namespace Service
 
     public List<FindResponse> Find(string path, List<FindResponse> files, string text, List<string> excluede)
     {
+      if (text == "Bucket_Properties")
+      { }
 
       // Modify this path as necessary.  
       string startFolder = path;

@@ -12,5 +12,6 @@ namespace Service.Models
     public string LocalDirectory { get; set; }
     public string RelativePath { get; set; }
     public string ProyectName { get; set; }
+    public List<string> ProyectsList { get; set; } = new List<string>();
   }
 }

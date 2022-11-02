@@ -8,6 +8,7 @@ namespace Service.Models
   {
     public List<string> Paths { get; set; } = new List<string>();
     public List<string> UniquePaths { get; set; } = new List<string>();
+    public Dictionary<string, int> UniquePathsCount { get; set; } = new Dictionary<string, int>();
     public List<ReportItem> Items { get; set; } = new List<ReportItem>();
   }
 
@@ -15,9 +16,13 @@ namespace Service.Models
   {
     public List<ReportItem> Items { get; set; } = new List<ReportItem>();
     public string  Data { get; set; }
+    public string DataRaw { get; set; }
     public string Path { get; set; }
     public string Code { get; set; }
     public int LineNumber { get; set; }
+    public int FilesCount { get; set; }
+    public string FilesFindText { get; set; }
+    public List<string> FilesFind { get; set; } = new List<string>();
     public string LineCode { get; set; }
 
 
