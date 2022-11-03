@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Report by class</title>
+  <title>Report by projects</title>
 
 
   <link href="../lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
@@ -10,9 +10,9 @@
 </head>
 <body>
 
-  <h1 class="title">Report by class</h1>
+  <h1 class="title">Report by projects</h1>
   <span class="display">Show: </span>
-  <input checked data-tooltip='first level' id='radio-1' name='test' type='radio' /><label for="radio-1">Proyect</label>
+  <input checked data-tooltip='first level' id='radio-1' name='test' type='radio' /><label for="radio-1">Project</label>
   <input id='radio-2' data-tooltip='second level' name='test' type='radio' /><label for="radio-2">Class.Function</label>
   <input id='radio-3' data-tooltip='third level' name='test' type='radio' /><label for="radio-3">File</label>
 
@@ -92,9 +92,12 @@
 
       dataAll.items.forEach(filex => {
 
+
+/*        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".cls' + filex.dataRaw + '">View files</button>*/
+
         innerModal += modalSample.replace('...', filex.filesFind.join("<br/>")).replace('xxx', 'cls' + filex.dataRaw)
 
-        innerHtml = ' <li> <span>' + filex.data + '  <button type="button"   class="btn btn-primary" data-toggle="modal" data-target=".cls' + filex.dataRaw + '">View files</button></span> <ol>'
+        innerHtml = ' <li> <span>' + filex.data + ' </span> <ol>'
 
         filex.items.forEach(classx => {
 

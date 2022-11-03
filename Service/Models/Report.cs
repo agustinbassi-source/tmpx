@@ -24,6 +24,7 @@ namespace Service.Models
     public string FilesFindText { get; set; }
     public List<string> FilesFind { get; set; } = new List<string>();
     public string LineCode { get; set; }
+    public bool Found { get; set; } = false;
 
 
 

@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Service.Models
 {
-  public class Proyect
+  public class Project
   {
-    public int Id { get; set; }
-    public List<ProyectFile> ProyectFiles { get; set; } = new List<ProyectFile>();
+ 
+    public List<ProjectFile> ProyectFiles { get; set; } = new List<ProjectFile>();
     public string LocalDirectory { get; set; }
     public string RelativePath { get; set; }
     public string ProyectName { get; set; }

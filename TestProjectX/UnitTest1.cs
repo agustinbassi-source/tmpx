@@ -16,19 +16,19 @@ namespace TestProjectX
     {
       ReportService reportService = new ReportService();
 
-      var proyect = new Proyect()
+      var proyect = new Project()
       {
         LocalDirectory= "X:\\X_XP_Viewer",
         RelativePath = "\\Wigos System\\WGC\\GUI",
         ProyectName = "GUI Test"
       };
 
-      proyect.ProyectFiles.Add(new ProyectFile
+      proyect.ProyectFiles.Add(new ProjectFile
       {
         Namespace = "WSI.Common",
-         ProyectClasses = { new ProyectClass { 
+         ProyectClasses = { new ProjectClass { 
           Name = "BucketsUpdate",
-           ProyectFunctions = { new ProyectFunction { FunctionName = "UpdateCustomerBucket" } }
+           ProyectFunctions = { new ProjectFunction { FunctionName = "UpdateCustomerBucket" } }
          } }
 
       });

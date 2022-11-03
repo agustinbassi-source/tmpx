@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Service.Models
 {
-  public class ProyectClass
+  public class ProjectClass
   {
     public string Name { get; set; }
     public int Count { get; set; }
-    public List<ProyectFunction> ProyectFunctions { get; set; } = new List<ProyectFunction>();
+    public List<ProjectFunction> ProyectFunctions { get; set; } = new List<ProjectFunction>();
   }
 }

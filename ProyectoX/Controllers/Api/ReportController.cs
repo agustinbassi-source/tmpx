@@ -13,7 +13,7 @@ namespace ProyectoX.Controllers.Api
   {
     ReportService reportService = new ReportService();
 
-    Proyect proyecto2;
+    Project proyecto2;
 
     string pathHtml = "X:\\Git\\tmpx\\ProyectoX\\wwwroot\\html\\";
 
@@ -23,7 +23,7 @@ namespace ProyectoX.Controllers.Api
     {
       proyecto2 = reportService.GenerateProyect("X:\\FGNUGETUPDATE\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Buckets.cs");
       proyecto2.LocalDirectory = "X:\\FGNUGETUPDATE";
-      proyecto2.RelativePath = "\\Wigos System\\WGC"; //WGC\\GUI
+      proyecto2.RelativePath = "\\Wigos System\\"; //WGC\\GUI
       proyecto2.ProyectName = "GUI Test";
     }
 
@@ -32,12 +32,12 @@ namespace ProyectoX.Controllers.Api
     [HttpGet]
     public Report Build()
     {
-      var json = string.Empty;
-      using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
-      {
-        json = r.ReadToEnd();
-      }
-        var response = reportService.BuildReport(proyecto2, json);
+      //var json = string.Empty;
+      //using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
+      //{
+      //  json = r.ReadToEnd();
+      //}
+        var response = reportService.BuildReport(proyecto2);
 
     reportService.WriteReportHtml(response,"report", pathHtml, pathDestinationHtml);
 

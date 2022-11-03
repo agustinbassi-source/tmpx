@@ -16,8 +16,16 @@ namespace Service
   {
     private readonly SearchService searchService = new SearchService();
 
-    public Report BuildReport3(Proyect proyect)
+
+
+    public Report BuildReport3(Project proyect)
     {
+      var json = string.Empty;
+      using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
+      {
+        json = r.ReadToEnd();
+      }
+
       var reportInitial = BuildReport(proyect);
 
       Report response = new Report();
@@ -32,7 +40,7 @@ namespace Service
 
       var levelOther = new ReportItem
       {
-        Data = "Others",
+        Data = "Other files",
         DataRaw = "Others"
       };
 
@@ -44,52 +52,102 @@ namespace Service
           DataRaw = proyectx
         };
 
-        foreach (var filex in reportInitial.Items)
+        int level1cCount = 0;
+        int level1cCountFunctions = 0;
+
+        foreach (ReportItem filex in reportInitial.Items)
         {
-          foreach (var classx in filex.Items)
+          if (filex.Path.Contains(proyectx + @"\"))
           {
-            foreach (var functionx in classx.Items)
+            filex.Found = true;
+
+            foreach (var classx in filex.Items)
             {
-              if (filex.Path.Contains(proyectx) && !level1.Items.Select(x => x.DataRaw).Contains(functionx.Data))
+              foreach (var functionx in classx.Items)
               {
-                var level2 = new ReportItem
+
+                if (!level1.Items.Select(x => x.DataRaw).Contains(functionx.Data))
                 {
-                  Data = classx.Data + "." + functionx.Data,
-                  DataRaw = functionx.Data,
-                };
+                  level1cCount++;
 
-                level1.Items.Add(level2);
-              }
-              else
-              {
-                //var level2 = new ReportItem
-                //{
-                //  Data = classx.Data + "." + functionx.Data,
-                //  DataRaw = functionx.Data,
-                //};
+                  var level2 = new ReportItem
+                  {
+                    Data = classx.Data + "." + functionx.Data,
+                    DataRaw = functionx.Data,
+                  };
 
-                //levelOther.Items.Add(level2);
+                  int level2cCount = 0;
+
+                  var filex2items = reportInitial.Items.Where(x => x.Path.Contains(proyectx)).ToList();
+
+                  foreach (var filex2 in filex2items)
+                  {
+                    foreach (var classx2 in filex2.Items)
+                    {
+                      if (classx2.Data == classx.Data)
+                      {
+                        foreach (var functionx2 in classx2.Items)
+                        {
+                          if (functionx2.Data == functionx.Data && !level2.Items.Select(x => x.DataRaw).Contains(filex2.Data))
+                          {
+                            level2cCount++;
+                            level1cCountFunctions++;
+
+                            level2.Items.Add(new ReportItem
+                            {
+                              Data = filex2.Path + ":" + functionx2.LineNumber + " => " + functionx2.LineCode,
+                              DataRaw = filex2.Data
+                            });
+                          }
+                        }
+                      }
+                    }
+                  }
+
+                  level2.Data += " (Files in use: " + level2cCount + ")";
+                  level1.Items.Add(level2);
+                }
               }
+
+
             }
           }
 
 
+
         }
 
-
+        level1.Data += " (Functions in use: " + level1cCount + ", Files in use: " + level1cCountFunctions + ")";
         response.Items.Add(level1);
+      }
+
+      foreach (var item in reportInitial.Items.Where(x => !x.Found).ToList())
+      {
+        levelOther.Items.Add(new ReportItem
+        {
+          Data = item.Path,
+          DataRaw = item.Data
+        });
       }
 
       response.Items.Add(levelOther);
 
+      response.Items = response.Items.Where(x => x.Items.Count > 0).ToList();
 
       return response;
     }
 
 
-    public Report BuildReport2(Proyect proyect)
+    public Report BuildReport2(Project proyect)
     {
-      var reportInitial = BuildReport(proyect);
+      var json = string.Empty;
+      using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
+      {
+        json = r.ReadToEnd();
+      }
+
+
+      var reportInitial = BuildReport(proyect, json);
 
       Report response = new Report();
 
@@ -166,7 +224,7 @@ namespace Service
       return response;
     }
 
-    public Report BuildReport(Proyect proyect)
+    public Report BuildReport(Project proyect)
     {
       Report response = new Report();
 
@@ -351,7 +409,7 @@ namespace Service
       return response;
     }
 
-    public Report BuildReport(Proyect proyect, string jsonString)
+    public Report BuildReport(Project proyect, string jsonString)
     {
       Report response = new Report();
 
@@ -367,37 +425,64 @@ namespace Service
 
       //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
 
-      //    File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
+     File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
 
       // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
     }
 
-    public Proyect GenerateProyect(string path)
+    public Project GenerateProyect(string path)
     {
-      var response = new Proyect();
+      var response = new Project();
 
       response.ProyectsList.AddRange(new List<string>{
       "\\Wigos System\\WGC\\Kernel\\WSI.Common",
       "\\Wigos System\\WGC\\Kernel\\WSI.CommonA",
-      "\\Wigos System\\WGC\\GUI"
-      });
+      "\\Wigos System\\WGC\\GUI",
+      "\\Wigos System\\WGC\\Kernel\\WSI.WCPA",
+      "\\Wigos System\\WGC\\Kernel\\WSI.WCP",
+      "\\Wigos System\\EveriCompliance.Test.Console",
+      "\\Wigos System\\WSI.Cashier",
+      "\\Wigos System\\WSI.PinPad.Service",
+      "\\Wigos System\\WSI.Service",
+      "\\Wigos System\\WSI.SQLBusinessLogic",
+      "\\Wigos System\\WSI.WCP_Protocol",
+      "\\Wigos System\\WSI.WWP_Client",
+      "\\Wigos System\\WSI.WWP_Server",
+      "\\Wigos System\\FB",
+      "\\Wigos System\\PokerAtlas",
+      "\\Wigos System\\WSI.WWP_Client",
+      "\\Wigos System\\WSI.WWP_Server",
+      "\\Wigos System\\WSPoints",
+      "\\Wigos System\\Buckets",
+      "\\Wigos System\\Wigos.Components\\Wigos.Components.Buckets",
+      "\\Wigos System\\Wigos.Components\\Wigos.Components.Customers",
+      "\\Wigos System\\Wigos.ReceptionApi",
+      "\\Wigos System\\WSI.WWP_Server",
+      "\\Wigos System\\WSPoints",
+      "\\Wigos System\\C2GO",
+      "\\Wigos System\\Wigos.Business\\FoodAndBeverage",
+      "\\Wigos System\\Wigos.Components\\Wigos.Components.Buckets",
+      "\\Wigos System\\Wigos.Components\\Wigos.Components.PACIN",
+     });
+
+      response.ProyectsList = response.ProyectsList.Distinct().OrderBy(x=> x).ToList();
 
       response.ProyectFiles.Add(GetFile(path));
 
       return response;
     }
 
-    private ProyectFile GetFile(string path)
+    private ProjectFile GetFile(string path)
     {
       var code = File.ReadLines(path, Encoding.UTF8).ToList();
 
-      var response = new ProyectFile();
+      var response = new ProjectFile();
 
       response.Path = path;
 
       string className = string.Empty;
 
-      List<ProyectFunction> functions = new List<ProyectFunction>();
+      List<ProjectFunction> functions = new List<ProjectFunction>();
 
       int lineNumber = 0;
 
@@ -416,7 +501,7 @@ namespace Service
 
           if (className != string.Empty)
           {
-            response.ProyectClasses.Add(new ProyectClass
+            response.ProyectClasses.Add(new ProjectClass
             {
               Name = className,
               ProyectFunctions = functions.ToList()
@@ -440,7 +525,7 @@ namespace Service
 
             className = name;
 
-            functions = new List<ProyectFunction>();
+            functions = new List<ProjectFunction>();
           }
           catch { }
 
@@ -489,7 +574,7 @@ namespace Service
               }
             }
 
-            functions.Add(new ProyectFunction
+            functions.Add(new ProjectFunction
             {
               FunctionName = functionName,
               Parameters = parameters
