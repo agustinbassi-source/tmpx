@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Service;
 using Service.Models;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 
 namespace ProyectoX.Controllers.Api
@@ -21,8 +24,17 @@ namespace ProyectoX.Controllers.Api
 
     public ReportController()
     {
-      proyecto2 = reportService.GenerateProyect("X:\\FGNUGETUPDATE\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Buckets.cs");
-      proyecto2.LocalDirectory = "X:\\FGNUGETUPDATE";
+      List<string> filesToAnalyze = new List<string>();
+
+     // filesToAnalyze.Add("C:\\C_MI_F\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Drawing\\DataBaseRepository.cs");
+      //filesToAnalyze.Add("C:\\C_MI_F\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Drawing\\DrawingService.cs");
+     filesToAnalyze.Add("X:\\SourceAC\\MI4000\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Buckets.cs");
+    //  filesToAnalyze.Add("C:\\C_MI_F\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Drawing\\Factories.cs");
+    //  filesToAnalyze.Add("C:\\C_MI_F\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Drawing\\Interfaces.cs");
+    //  filesToAnalyze.Add("C:\\C_MI_F\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Drawing\\Models.cs");
+
+      proyecto2 = reportService.GenerateProyect(filesToAnalyze); // "X:\\FGNUGETUPDATE\\Wigos System\\WGC\\Kernel\\WSI.CommonA\\Buckets.cs"
+      proyecto2.LocalDirectory = "X:\\SourceAC\\Buckets10";
       proyecto2.RelativePath = "\\Wigos System\\"; //WGC\\GUI
       proyecto2.ProyectName = "GUI Test";
     }
@@ -37,13 +49,13 @@ namespace ProyectoX.Controllers.Api
       //{
       //  json = r.ReadToEnd();
       //}
-        var response = reportService.BuildReport(proyecto2);
+      var response = reportService.BuildReport(proyecto2);
 
-    reportService.WriteReportHtml(response,"report", pathHtml, pathDestinationHtml);
+      reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
 
       return response;
 
-      
+
 
       // ReportService reportService = new ReportService();
 
@@ -91,11 +103,11 @@ namespace ProyectoX.Controllers.Api
     [HttpGet]
     public Report BuildDos()
     {
-     
+
 
       var response = reportService.BuildReport2(proyecto2);
 
-     reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
+      reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
 
       return response;
 
@@ -135,11 +147,18 @@ namespace ProyectoX.Controllers.Api
     [HttpGet]
     public Report BuildTres()
     {
-      var response = reportService.BuildReport3(proyecto2);
+      try
+      {
+        var response = reportService.BuildReport3(proyecto2);
 
-      reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
+        reportService.WriteReportHtml(response, "report", pathHtml, pathDestinationHtml);
 
-      return response;
+        return response;
+      }
+      catch(Exception e)
+      {
+        return null;
+      }
     }
   }
 }

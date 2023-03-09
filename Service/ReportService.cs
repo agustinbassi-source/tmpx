@@ -21,6 +21,7 @@ namespace Service
     public Report BuildReport3(Project proyect)
     {
       var json = string.Empty;
+
       using (StreamReader r = new StreamReader(@"./Resources/reportexport.json"))
       {
         json = r.ReadToEnd();
@@ -332,7 +333,17 @@ namespace Service
                 {
                   if (asd.Data == classx.Name)
                   {
-                    var classProyect = proyect.ProyectFiles[0].ProyectClasses.Where(x => x.Name == classx.Name).FirstOrDefault();
+                    ProjectClass classProyect = null;
+
+                    foreach (var pf in proyect.ProyectFiles)
+                    {
+                      classProyect = pf.ProyectClasses.Where(x => x.Name == classx.Name).FirstOrDefault();
+
+                      if (classProyect != null)
+                      {
+                        continue;
+                      }
+                    }
 
                     classProyect.Count += 1;
 
@@ -425,12 +436,12 @@ namespace Service
 
       //code = code.Replace("var dataAll = null;", "var dataAll = JSON.parse(" + JsonSerializer.Serialize(report)+");");
 
-     File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
+      //File.WriteAllText(destinationPath + "html\\" + reportName + "export.json", JsonSerializer.Serialize(report), Encoding.UTF8);
 
       // File.WriteAllText(destinationPath + "html\\" + reportName + "export.html", code, Encoding.UTF8);
     }
 
-    public Project GenerateProyect(string path)
+    public Project GenerateProyect(List<string> filePaths)
     {
       var response = new Project();
 
@@ -463,12 +474,23 @@ namespace Service
       "\\Wigos System\\Wigos.Business\\FoodAndBeverage",
       "\\Wigos System\\Wigos.Components\\Wigos.Components.Buckets",
       "\\Wigos System\\Wigos.Components\\Wigos.Components.PACIN",
+      "\\Wigos System\\Wigos.Business\\Drawings",
+      //"\\Wigos System\\Wigos.Components\\AutoPrint",
+      //"\\Wigos System\\Wigos.Components\\PeriodicTasks",
+      //"\\Wigos System\\Wigos.Components\\PACIN",
+      //"\\Wigos System\\Wigos.Components\\Wigos.Components.PeriodicTasks",
+      //"\\Wigos System\\Wigos.Components\\Buckets",
+      //"\\Wigos System\\Wigos.Components\\Customers"
+
      });
 
-      response.ProyectsList = response.ProyectsList.Distinct().OrderBy(x=> x).ToList();
+      response.ProyectsList = response.ProyectsList.Distinct().OrderBy(x => x).ToList();
 
-      response.ProyectFiles.Add(GetFile(path));
-
+      foreach (var path in filePaths)
+      {
+        response.ProyectFiles.Add(GetFile(path));
+      }
+    
       return response;
     }
 

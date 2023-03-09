@@ -13,13 +13,19 @@ namespace Service
   public class SearchService
   {
 
-    public List<FindResponse> Find(string path, List<FindResponse> files, string text, List<string> excluede)
+    public List<FindResponse> Find(string path, List<FindResponse> files, string text, List<string> excluededFiles, List<string> excludedDirectories = null)
     {
-      if (text == "Bucket_Properties")
-      { }
+
+      excludedDirectories = new List<string>();
+
+   //   excludedDirectories.Add("X:\\SourceAC\\Buckets8\\Wigos System\\CamaraOcupacion");
 
       // Modify this path as necessary.  
       string startFolder = path;
+
+      List<FindResponse> fileResponse = new List<FindResponse>();
+
+      // si la carpeta en la q busco esta en excludedDirectories, retrun fileResponse;
 
       // Take a snapshot of the file system.  
 
@@ -35,10 +41,10 @@ namespace Service
         System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(startFolder);
 
         fileList = dir.GetFiles("*.*", System.IO.SearchOption.AllDirectories)
-            .Where(s => s.FullName.EndsWith(".cs") || s.FullName.EndsWith(".vb")).ToList();
+            .Where(s => (s.FullName.EndsWith(".cs") || s.FullName.EndsWith(".vb")) && !excludedDirectories.Contains( s.DirectoryName) ).ToList();
       }
 
-      List<FindResponse> fileResponse = new List<FindResponse>();
+     
 
       string searchTerm = text;
 
@@ -57,7 +63,7 @@ namespace Service
       // Console.WriteLine("The term \"{0}\" was found in:", searchTerm);
       foreach (string filename in queryMatchingFiles)
       {
-        if (!excluede.Contains(filename))
+        if (!excluededFiles.Contains(filename))
         {
           var textAll = GetFileText(filename);
 
