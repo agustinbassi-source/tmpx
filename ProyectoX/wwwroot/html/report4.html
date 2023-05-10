@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report by projects</title>
+
+
+  <link href="../lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+  <link href="../css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+
+
+
+  <div id="treeCode">generando reporte...</div>
+
+
+  <script src="../lib/jquery/dist/jquery.js"></script>
+
+  <script src="../lib/bootstrap/dist/js/bootstrap.js"></script>
+
+  <script type="text/javascript">
+
+    var dataAll = null;
+
+    var modalSample = ' <div class="modal fade bd-example-modal-lg modal-fullscreen-xxl-down  xxx"  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">  <div class="modal-dialog modal-lg" >    <div class="modal-content">  ... </div>  </div>  </div>';
+
+    const getCode = (name) => {
+
+      console.log('search: ' + name);
+
+      dataAll.items.forEach(filex => {
+
+        if (filex.data == name)
+          document.getElementById('modalContentX').innerHTML = filex.code;
+
+      });
+
+    }
+
+    const fillReport = () => {
+
+      let innerHtml = '';
+      let headerHtml = '';
+      let countMenu = 0;
+      let countItems = 0;
+
+      document.getElementById("treeCode").innerHTML = '';
+
+      dataAll.items.forEach(filex => {
+
+
+
+        if (filex.items.length > 0) {
+
+          let countTotals = 0;
+
+          filex.items.forEach(ssss => {
+            countTotals += ssss.items.length;
+          })
+
+          if (countTotals > 0) {
+
+            countMenu++;
+            countItems = 0;
+
+            headerHtml += '   <h6>' + countMenu + ' ' + filex.data + ' </h6> '
+
+            innerHtml += '  <h4 style="background-color:aqua">' + filex.data + ' </h4> '
+
+            filex.items.forEach(classx => {
+
+              if (classx.items.length > 0) {
+
+                innerHtml += ' <h5 style="background-color:greenyellow">' + classx.data + '</h5>'
+
+                countItems++;
+
+                headerHtml += '  <span>&nbsp;&nbsp;- ' +countMenu+'.'+countItems+' ' + classx.data + ' </span><br/> '
+
+                innerHtml += '<table border="1">'
+
+                classx.items.forEach(functionx => {
+
+                  innerHtml += '<tr>'
+
+                  innerHtml += ' <td>' + functionx.path.replace('X:\\SourceAC\\MIBuckets2\\Wigos System\\', '').trim() + ':' + functionx.lineNumber + ' &nbsp; </td > '
+
+                  innerHtml += '<td>&nbsp; ' + functionx.code + '</td>'
+
+                  innerHtml += '</tr>'
+
+                });
+
+                innerHtml += '<table><br/>'
+              }
+
+            });
+
+          }
+        }
+
+
+
+      });
+
+      document.getElementById("treeCode").innerHTML += headerHtml + '<br/>' + innerHtml;
+
+
+    }
+
+    const getReport = () => {
+
+      if (dataAll === null) {
+
+        fetch('/api/report/buildTres')
+          .then(response => response.json())
+          .then(data => {
+
+            console.log(data)
+
+            dataAll = data;
+
+            fillReport();
+
+          });
+      }
+      else {
+        fillReport();
+      }
+
+    }
+
+
+    //const getReport = () => {
+
+    //  fetch('/api/report/buildDos')
+    //    .then(response => response.json())
+    //    .then(data => {
+
+    //      console.log(data)
+
+    //      dataAll = data;
+
+    //      let innerHtml;
+
+    //      dataAll.items.forEach(filex => {
+
+    //        innerHtml = ' <li> <span>' + filex.data + '  <ol>'
+
+    //        filex.items.forEach(classx => {
+
+    //          innerHtml += ' <li> <span>' + classx.data + '</span> <ol>'
+
+
+    //          classx.items.forEach(functionx => {
+
+    //            innerHtml += ' <li><span>' + functionx.data + ' </span></li>'
+
+    //          });
+
+    //          innerHtml += '  </ol> </li> ';
+
+    //        });
+
+    //        innerHtml += '  </ol> </li> ';
+
+    //        document.getElementById("treeCode").innerHTML += innerHtml;
+
+    //      });
+
+
+
+    //    });
+
+    //}
+
+    getReport();
+
+  </script>
+
+
+</body>
+</html>

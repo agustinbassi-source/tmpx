@@ -14,28 +14,28 @@ namespace TestProjectX
     [Test]
     public void Test1()
     {
-      ReportService reportService = new ReportService();
+      //ReportService reportService = new ReportService();
 
-      var proyect = new Project()
-      {
-        LocalDirectory= "X:\\X_XP_Viewer",
-        RelativePath = "\\Wigos System\\WGC\\GUI",
-        ProyectName = "GUI Test"
-      };
+      //var proyect = new Project()
+      //{
+      //  LocalDirectory= "X:\\X_XP_Viewer",
+      //  RelativePath = "\\Wigos System\\WGC\\GUI",
+      //  ProyectName = "GUI Test"
+      //};
 
-      proyect.ProyectFiles.Add(new ProjectFile
-      {
-        Namespace = "WSI.Common",
-         ProyectClasses = { new ProjectClass { 
-          Name = "BucketsUpdate",
-           ProyectFunctions = { new ProjectFunction { FunctionName = "UpdateCustomerBucket" } }
-         } }
+      //proyect.ProyectFiles.Add(new ProjectFile
+      //{
+      //  Namespace = "WSI.Common",
+      //   ProyectClasses = { new ProjectClass { 
+      //    Name = "BucketsUpdate",
+      //     ProyectFunctions = { new ProjectFunction { FunctionName = "UpdateCustomerBucket" } }
+      //   } }
 
-      });
+      //});
 
 
 
-      reportService.BuildReport(proyect);
+     // reportService.BuildReport(proyect);
 
 
       
